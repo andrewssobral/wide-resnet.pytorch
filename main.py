@@ -62,8 +62,8 @@ elif(args.dataset == 'cifar100'):
     testset = torchvision.datasets.CIFAR100(root='./data', train=False, download=False, transform=transform_test)
     num_classes = 100
 
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2)
-testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=2)
+trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=1)
+testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=1)
 
 # Return network & file name
 def getNetwork(args):
@@ -96,7 +96,8 @@ if (args.testOnly):
     if use_cuda:
         net.cuda()
         net = torch.nn.DataParallel(net, device_ids=range(torch.cuda.device_count()))
-        cudnn.benchmark = True
+        cudnn.benchmark = False
+        #cudnn.benchmark = True
 
     net.eval()
     test_loss = 0
@@ -137,7 +138,8 @@ else:
 if use_cuda:
     net.cuda()
     net = torch.nn.DataParallel(net, device_ids=range(torch.cuda.device_count()))
-    cudnn.benchmark = True
+    cudnn.benchmark = False
+    #cudnn.benchmark = True
 
 criterion = nn.CrossEntropyLoss()
 
@@ -160,7 +162,8 @@ def train(epoch):
         loss.backward()  # Backward Propagation
         optimizer.step() # Optimizer update
 
-        train_loss += loss.data[0]
+        train_loss += loss.data.item()
+        #train_loss += loss.data[0]
         _, predicted = torch.max(outputs.data, 1)
         total += targets.size(0)
         correct += predicted.eq(targets.data).cpu().sum()
@@ -168,7 +171,10 @@ def train(epoch):
         sys.stdout.write('\r')
         sys.stdout.write('| Epoch [%3d/%3d] Iter[%3d/%3d]\t\tLoss: %.4f Acc@1: %.3f%%'
                 %(epoch, num_epochs, batch_idx+1,
-                    (len(trainset)//batch_size)+1, loss.data[0], 100.*correct/total))
+                    (len(trainset)//batch_size)+1, loss.data.item(), 100.*correct/total))
+        #sys.stdout.write('| Epoch [%3d/%3d] Iter[%3d/%3d]\t\tLoss: %.4f Acc@1: %.3f%%'
+        #        %(epoch, num_epochs, batch_idx+1,
+        #            (len(trainset)//batch_size)+1, loss.data[0], 100.*correct/total))
         sys.stdout.flush()
 
 def test(epoch):
@@ -184,14 +190,16 @@ def test(epoch):
         outputs = net(inputs)
         loss = criterion(outputs, targets)
 
-        test_loss += loss.data[0]
+        test_loss += loss.data.item()
+        #test_loss += loss.data[0]
         _, predicted = torch.max(outputs.data, 1)
         total += targets.size(0)
         correct += predicted.eq(targets.data).cpu().sum()
 
     # Save checkpoint when best model
     acc = 100.*correct/total
-    print("\n| Validation Epoch #%d\t\t\tLoss: %.4f Acc@1: %.2f%%" %(epoch, loss.data[0], acc))
+    #print("\n| Validation Epoch #%d\t\t\tLoss: %.4f Acc@1: %.2f%%" %(epoch, loss.data[0], acc))
+    print("\n| Validation Epoch #%d\t\t\tLoss: %.4f Acc@1: %.2f%%" %(epoch, loss.data.item(), acc))
 
     if acc > best_acc:
         print('| Saving Best model...\t\t\tTop1 = %.2f%%' %(acc))
