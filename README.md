@@ -1,3 +1,22 @@
+### Update
+
+Tested with:
+* Python 2.7 and 3.6 (`wide-resnet` not works on Python 3.x)
+* PyTorch 1.0.0, 1.0.1
+
+Usage:
+```bash
+python main.py --lr 0.1 --net_type lenet --depth 28 --widen_factor 10 --dropout 0.3 --dataset cifar10
+
+python main.py --lr 0.1 --net_type vggnet --depth 16 --widen_factor 10 --dropout 0.3 --dataset cifar10
+
+python main.py --lr 0.1 --net_type resnet --depth 18 --widen_factor 10 --dropout 0.3 --dataset cifar10
+
+python main.py --lr 0.1 --net_type wide-resnet --depth 28 --widen_factor 10 --dropout 0.3 --dataset cifar10
+```
+
+### Official
+
 <p align="center"><img width="40%" src="./imgs/pytorch.png"></p>
 
 Best CIFAR-10, CIFAR-100 results with wide-residual networks using PyTorch
